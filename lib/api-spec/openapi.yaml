@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: menu
+    description: Menu import operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /menu/parse:
+    post:
+      operationId: parseMenuImage
+      tags: [menu]
+      summary: Extract menu items from an image
+      description: Reads a restaurant menu image and returns draft items for review.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuParseInput"
+      responses:
+        "200":
+          description: Parsed menu draft
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuParseResponse"
+        "400":
+          description: Invalid image or request
+        "429":
+          description: Import limit reached
+        "502":
+          description: Menu extraction service failed
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    MenuParseInput:
+      type: object
+      required: [mimeType, imageBase64]
+      properties:
+        mimeType:
+          type: string
+          enum: [image/jpeg, image/png, image/webp]
+        imageBase64:
+          type: string
+          minLength: 1
+          maxLength: 7000000
+    ParsedMenuItem:
+      type: object
+      required: [name, category, price]
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+          minimum: 0
+        description:
+          type: ["string", "null"]
+    MenuParseResponse:
+      type: object
+      required: [items, sourceLanguage]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParsedMenuItem"
+        sourceLanguage:
+          type: ["string", "null"]
+

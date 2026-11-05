@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/neon-restaurant/"
+title = "Neon Restaurant Manager"
+description = "A bilingual restaurant operations dashboard for managing menus, orders, and stock with a futuristic neon interface."
+version = "1.0.0"
+id = "artifacts/neon-restaurant"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/neon-restaurant/" ]
+localPort = 25569
+
+[services.development]
+run = "pnpm --filter @workspace/neon-restaurant run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/neon-restaurant", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/neon-restaurant/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25569"
+BASE_PATH = "/neon-restaurant/"
